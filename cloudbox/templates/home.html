@@ -18,6 +18,7 @@
 
 
 	<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
 
 	</head>
@@ -44,69 +45,158 @@
 
 	<main role="main" class="container">
 	
+
+	<div style= "height: 70px"></div>
 	<div class="container">
+			
+			<div class="container">
+			<form method="GET">
+				<div class="btn-group dropright">
+					  <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					    Select Location
+					  </button>
+					  <div class="dropdown-menu" >
+					  	{% for location in locations %}
+					    <a class="dropdown-item" name = "{{location}}" value="{{ location }}" href="{{url_for('home_loc',location = location )}}">{{ location }}</a>
+					    {% endfor %}
+					  </div>
 
-	<div class="container">
-	<form method="GET">
-		<div class="btn-group dropright">
-			  <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-			    Select Location
-			  </button>
-			  <div class="dropdown-menu" >
-			  	{% for location in locations %}
-			    <a class="dropdown-item" name = "{{location}}" value="{{ location }}" href="{{url_for('home_loc',location = location )}}">{{ location }}</a>
-			    
-			    {% endfor %}
-			  </div>
+				</div>
+			</form>
+			</div>
 
-		</div>
-	</form>
-	</div>
-
-	<div style= "height: 40px">
-
+	<div style="height: 30px" >
+		
 	</div>
 	
+	
+	<div style= "height: 40px"></div>
+	
+		<div class="container">
+			<form method="GET">
+				<div class="btn-group dropright">
+					  <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					    Select Purpose
+					  </button>
+					  <div class="dropdown-menu" >
+					  	{% for purpose in purposes %}
+					    <a class="dropdown-item" name = "{{purpose}}" value="{{ purpose }}" href="{{url_for('location_purpose',location = message,purpose= purpose )}}">{{ purpose }}</a>
+					    
+					    {% endfor %}
+					  </div>
+
+				</div>
+			</form>
+		</div>
+
+
+<div style= "height: 70px"> </div>	
+
+
 	<div class="container">
-		<form action="">
-	<div class="form-check form-check-inline">
-		  <input class="form-check-input" name="check" type="checkbox" id="inlineCheckbox1" value="aws" onchange="myFunction(this.value)">
-		  <label class="form-check-label" for="inlineCheckbox1">AWS</label>
+		<div class="d-inline-block">
+			<form method="GET" >
+				<div class="btn-group dropdown">
+				<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id = "cpu">
+					    Select vCPU
+					  </button>
+					  	<div class="dropdown-menu" >
+					  	{% for cpu in cpu_list %}
+
+							<a class="dropdown-item" name = "{{cpu}}" value="{{ cpu }}" href="{{url_for('location_purpose',location = message,purpose = purpose )}}">{{cpu}}</a>
+					  		
+					    
+					    {% endfor %}
+					  </div>
+
+				</div>
+			</form>
+			</div>
+		
+
+			<div class="d-inline-block">
+			<form method="GET" >
+				<div class="btn-group dropdown">
+				<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id = "cpu">
+					    Select Memory
+					  </button>
+					  	<div class="dropdown-menu" >
+					  	{% for mem in mem_list %}
+							<a class="dropdown-item" name = "{{cpu}}" value="{{ cpu }}" href="{{url_for('location_purpose',location = message,purpose = purpose )}}">{{ mem }}</a>
+					    
+					    {% endfor %}
+					  </div>
+
+				</div>
+			</form>
+			</div>
+
+			<div class="d-inline-block">
+			<form method="GET" >
+				<div class="btn-group dropdown">
+				<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id = "cpu">
+					    Select GPU
+					  </button>
+					  	<div class="dropdown-menu" >
+					  	{% for gpu in gpu_list %}
+							<a class="dropdown-item" name = "{{cpu}}" value="{{ cpu }}" href="{{url_for('location_purpose',location = message,purpose = purpose )}}">{{ gpu }}</a>
+					    
+					    {% endfor %}
+					  </div>
+
+				</div>
+			</form>
+			</div>
 	</div>
-	<div class="form-check form-check-inline">
-		  <input class="form-check-input" name="check" type="checkbox" id="inlineCheckbox2" value="azure" onchange="myFunction(this.value)">
-		  <label class="form-check-label" for="inlineCheckbox2">Azure</label>
+<div style="height: 40px "></div>
+
+	<div class="container">
+
+	<table class="table table-hover">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">TypeVm</th>
+      <th scope="col">Purpose</th>
+      <th scope="col">CPU</th>
+      <th scope="col">MEM</th>
+      <th scope="col">OnDemandPrice</th>
+      <th scope="col">Provider</th>
+    </tr>
+  </thead>
+  <tbody>
+  	{% if results %}
+
+	{% for result in results %}
+    <tr>
+    		
+		
+			<th scope="row"></th>
+			<td>{{result['type']}}</td>
+      		<td>{{result['purpose']}}</td>
+      		<td>{{result['cpusPerVm']}}</td>
+      		<td>{{result['memPerVm']}}</td>
+      		<td>{{result['onDemandPrice']}}</td>
+      		<td>{{result['provider']}}</td>
+
+		
+		
+      
+    </tr>
+    	{% endfor %}
+		{% endif %}
+  </tbody>
+</table>
+</div>
+
+
+
+
+
+
+
+
 	</div>
-	<div class="form-check form-check-inline">
-		  <input class="form-check-input" name="check" type="checkbox" id="inlineCheckbox3" value="google" onchange="myFunction(this.value)">
-		  <label class="form-check-label" for="inlineCheckbox3">Google</label>
-	</div>
-	</div>
-
-	<p id="demo"></p>
-	<script>
-		var providers = [];
-		function myFunction(val) {
- 			
- 			if (providers.includes(val)) {
- 				providers.pop(val);
- 				alert("The input value removed: " + val);
- 				document.getElementById("demo").innerHTML = providers;
- 			} else {
- 				alert("The input value added: " + val);
- 				providers.push(val)
- 				document.getElementById("demo").innerHTML = providers;
-
- 			}
-		}
-</script>
-
-	<div style= "height: 400px">
-		</form>
-	</div>
-
-
-
 	</div>
 
 <!-- 
@@ -114,17 +204,17 @@
 		{{message}}
 	{%endif %}
  -->
-
+<!-- 
 	{% if results %}
 	{% for result in results %}
 		
-		{{result.purpose}}
-		{{result.cpusPerVm}}</br>
+		
+		{{result}}</br>
 
 	{% endfor %}
 	{% endif %}
 
-
+ -->
 
 
 </div>
