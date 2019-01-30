@@ -80,7 +80,7 @@
 					  </button>
 					  <div class="dropdown-menu" >
 					  	{% for purpose in purposes %}
-					    <a class="dropdown-item" name = "{{purpose}}" value="{{ purpose }}" href="{{url_for('location_purpose',location = message,purpose= purpose )}}">{{ purpose }}</a>
+					    <a class="dropdown-item" name = "{{purpose}}" value="{{ purpose }}" href="{{url_for('location_purpose',location = message, purpose= purpose )}}">{{ purpose }}</a>
 					    
 					    {% endfor %}
 					  </div>
@@ -103,7 +103,8 @@
 					  	<div class="dropdown-menu" >
 					  	{% for cpu in cpu_list %}
 
-							<a class="dropdown-item" name = "{{cpu}}" value="{{ cpu }}" href="{{url_for('location_purpose',location = message,purpose = purpose )}}">{{cpu}}</a>
+					<a class="dropdown-item" name = "{{cpu}}" value="{{ cpu }}" href="{{url_for('location_purpose_cpu',location = message, purpose = message_purpose, cpu = cpu )}}">
+					{{cpu}}</a>
 					  		
 					    
 					    {% endfor %}
