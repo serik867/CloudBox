@@ -1,14 +1,19 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<link rel="icon" href="{{url_for('static', filename='cload.jpg')}}" type="image/jpg" sizes="16x16">
+
+		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css')}}">
 		<!-- Required meta tags -->
     	<meta charset="utf-8">
     	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		
+		
 
     	<!-- Bootstrap CSS -->
     	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 		
-		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css')}}">
+		
 
 		{%if title %}
 		<title> Cloud-Box - {{ title }}</title>
@@ -16,38 +21,44 @@
 		<title> Cloud-Box </title>
 		{% endif%}
 
-
-	<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-
-
 	</head>
 
 
 
 <body>
-	<header class="site-header">
-      <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
-        <div class="container">
-          <a class="navbar-brand mr-4" href="/">Cloud Box</a>
-          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarToggle">
-            <div class="navbar-nav mr-auto">
-              <a class="nav-item nav-link" href="/">Home</a>
-              <a class="nav-item nav-link" href="/about">About</a>
-            </div>
-          </div>
-        </div>
-      </nav>
-    </header>
 
-	<main role="main" class="container">
+				<div class="container">
+					<header class="navbar">
+					
+
+				      <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
+				        <div class="container">
+				          <a class="navbar-brand mr-4" href="/">Cloud Box</a>
+				          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
+				            <span class="navbar-toggler-icon"></span>
+				          </button>
+				          <div class="collapse navbar-collapse" id="navbarToggle">
+				            <div class="navbar-nav mr-auto">
+				              <a class="nav-item nav-link" href="/">Home</a>
+				              <a class="nav-item nav-link" href="/about">About</a>
+				            </div>
+				          </div>
+				        </div>
+				      </nav>
+
+					
+				    </header>
+				</div>
 	
+	
+	<div class="container" style=" height: 4em">
+		
 
-	<div style= "height: 70px"></div>
-	<div class="container">
+
+
+
+	</div>
+
 			
 			<div class="container">
 			<form method="GET">
@@ -123,7 +134,7 @@
 					  </button>
 					  	<div class="dropdown-menu" >
 					  	{% for mem in mem_list %}
-							<a class="dropdown-item" name = "{{cpu}}" value="{{ cpu }}" href="{{url_for('location_purpose',location = message,purpose = purpose )}}">{{ mem }}</a>
+							<a class="dropdown-item" name = "{{cpu}}" value="{{ cpu }}" href="{{url_for('location_purpose_cpu_mem',location = message,purpose = message_purpose,cpu= message_cpu, mem = mem )}}">{{ mem }}</a>
 					    
 					    {% endfor %}
 					  </div>
@@ -132,22 +143,7 @@
 			</form>
 			</div>
 
-			<div class="d-inline-block">
-			<form method="GET" >
-				<div class="btn-group dropdown">
-				<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id = "cpu">
-					    Select GPU
-					  </button>
-					  	<div class="dropdown-menu" >
-					  	{% for gpu in gpu_list %}
-							<a class="dropdown-item" name = "{{cpu}}" value="{{ cpu }}" href="{{url_for('location_purpose',location = message,purpose = purpose )}}">{{ gpu }}</a>
-					    
-					    {% endfor %}
-					  </div>
-
-				</div>
-			</form>
-			</div>
+			
 	</div>
 <div style="height: 40px "></div>
 
@@ -200,26 +196,8 @@
 	</div>
 	</div>
 
-<!-- 
-	{% if message %}
-		{{message}}
-	{%endif %}
- -->
-<!-- 
-	{% if results %}
-	{% for result in results %}
-		
-		
-		{{result}}</br>
-
-	{% endfor %}
-	{% endif %}
-
- -->
-
 
 </div>
-	</main>
 
 
 	<!-- Optional JavaScript -->

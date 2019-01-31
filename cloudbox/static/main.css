@@ -1,9 +1,16 @@
 body {
-  background: #ebf4f7;
+  background: #12BAEF;
   color: #333333;
-  margin-top: 5rem;
+  margin-top: 150rem;
 }
+.img-fluid{
+	overflow: auto;
+	
 
+}
+.clearfix  {
+  overflow: auto;
+}
 
 h1, h2, h3, h4, h5, h6 {
   color: #444444;
@@ -28,4 +35,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .btn .btn-danger .dropdown-toggle:focus {
 	background: blue
+}
+
+#header-text{
+	background-color: #cbd5db;
 }

@@ -112,31 +112,31 @@ def aws_search_by_location(location):
 	client = pymongo.MongoClient()
 	db = client['test-database']
 	col = db['aws']
-	places = col.find({'zone':location})
+	places = col.find({'zone':location}).sort('cpusPerVm',1)
 	return places
 
 def azure_search_by_location(location):
 	client = pymongo.MongoClient()
 	db = client['test-database']
 	col = db['azure']
-	places = col.find({'zone':location})
+	places = col.find({'zone':location}).sort('cpusPerVm',1)
 	return places
 
 def google_search_by_location(location):
 	client = pymongo.MongoClient()
 	db = client['test-database']
 	col = db['google']
-	places = col.find({'zone':location})
+	places = col.find({'zone':location}).sort('cpusPerVm',1)
 	return places
 
 def query_to_ordered_list(_query,name):
 	_list = []
 
 	for item in _query:
-		number = int(item[name])
+		
 
-		if number not in _list:
-			_list.append(number)
+		if item[name] not in _list:
+			_list.append(item[name])
 		else:
 			pass
 	_list.sort()
@@ -225,6 +225,46 @@ def query_location_purpose(location,purpose):
 		result.extend(google_result)
 		return result
 
+def query_location_purpose_cpu(location,purpose,cpu):
+	result =[]
+	
+	
+	aws_location = find_location(aws_regions,location)
+	aws_connect = connect_to_mongodb('aws')
+	aws_result = aws_connect.find({ "$and":[{'zone':aws_location},{'purpose': purpose },{'cpusPerVm': int(cpu)}]}).sort('memPerVm',1)
+	result.extend(aws_result)
+	
+	azure_location = find_location(azure_regions,location)
+	azure_connect = connect_to_mongodb('azure')
+	azure_result = azure_connect.find({ "$and":[{'zone':azure_location},{'purpose': purpose},{'cpusPerVm': int(cpu)}]}).sort('memPerVm',1)
+	result.extend(azure_result)
+
+	google_location = find_location(google_regions,location)
+	google_connect = connect_to_mongodb('google')
+	google_result = azure_connect.find({ "$and":[{'zone':azure_location},{'purpose':purpose},{'cpusPerVm': int(cpu)}]}).sort('memPerVm',1)
+	result.extend(google_result)
+	return result
+
+def query_location_purpose_cpu_mem(location,purpose,cpu,mem):
+	result =[]
+	
+	
+	aws_location = find_location(aws_regions,location)
+	aws_connect = connect_to_mongodb('aws')
+	aws_result = aws_connect.find({ "$and":[{'zone':aws_location},{'purpose': purpose },{'cpusPerVm': int(cpu)},{'memPerVm': float(mem)}]})
+	result.extend(aws_result)
+	
+	azure_location = find_location(azure_regions,location)
+	azure_connect = connect_to_mongodb('azure')
+	azure_result = azure_connect.find({ "$and":[{'zone':azure_location},{'purpose': purpose},{'cpusPerVm': int(cpu)},{'memPerVm': float(mem)}]})
+	result.extend(azure_result)
+
+	google_location = find_location(google_regions,location)
+	google_connect = connect_to_mongodb('google')
+	google_result = azure_connect.find({ "$and":[{'zone':azure_location},{'purpose':purpose},{'cpusPerVm': int(cpu)},{'memPerVm': float(mem)}]})
+	result.extend(google_result)
+	return result
+
 @app.route("/", methods = ['GET', 'POST'])
 @app.route("/index",methods = ['GET', 'POST'])
 @app.route("/home", methods = ['GET', 'POST'])
@@ -270,9 +310,28 @@ def location_purpose(location,purpose):
 
 @app.route("/<location>/<purpose>/<cpu>")
 def location_purpose_cpu(location,purpose,cpu):
+	results =[]
+	results = query_to_list(query_location_purpose_cpu(location,purpose,cpu))
+	
+	cpu_list = query_to_ordered_list(results,'cpusPerVm')
+	mem_list = query_to_ordered_list(results,'memPerVm')	
 
-	return "Done"
+	return render_template('home.html', locations=locations, results = results, purposes=purposes,
+	cpu_list=cpu_list, mem_list = mem_list, message=location, 
+	message_purpose= purpose, message_cpu=cpu)
 
+
+@app.route("/<location>/<purpose>/<cpu>/<mem>")
+def location_purpose_cpu_mem(location,purpose,cpu,mem):
+	results =[]
+	results = query_to_list(query_location_purpose_cpu_mem(location,purpose,cpu,mem))
+	cpu_list = query_to_ordered_list(results,'cpusPerVm')
+	mem_list = query_to_ordered_list(results,'memPerVm')	
+	#gpu_list = query_to_ordered_list(results,'gpusPerVm')
+
+	return render_template('home.html', locations=locations, results = results, purposes=purposes,
+	cpu_list=cpu_list, mem_list = mem_list, message=location, 
+	message_purpose= purpose, message_cpu=cpu,message_mem = mem)
 
 # @app.route("/providers",methods =['GET','POST'])
 # def get_button_data():
