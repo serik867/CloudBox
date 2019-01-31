@@ -182,11 +182,16 @@
     </tr>
     	{% endfor %}
 		{% endif %}
+
+
+		
+		
   </tbody>
 </table>
 </div>
-
-
+<div class="container">
+	<button class="btn btn-primary" type="button" onclick="window.location.href='{{ url_for( 'pdf_template' , location=message,purpose=message_purpose,cpu=message_cpu,mem=message_mem) }}';">Dowvload PDF</button>
+</div>
 
 
 

@@ -1,7 +1,8 @@
-from flask import Flask, render_template,url_for,request
+from flask import Flask, render_template,url_for,request, make_response
 import pymongo
 import json
 import bson
+import pdfkit
 
 
 app = Flask(__name__)
@@ -79,7 +80,7 @@ google_regions = {
 locations = [ 'Oregon', 'California', 'Virginia', 'S.Carolina', 'Ohio',
 			'Iowa', 'India', 'Tokyo', 'S.Korea', 'Sydney', 'Ireland', 'London',
 			'Frankfurt', 'Netherlands', 'France','Finland','Canada','China','Brazil' ]
-purposes = ['general', 'computer_opt','memory_opt', 'accelerated_comp','storage_opt']
+purposes = ['General', 'Computer Opt','Memory Opt', 'Accelerated Comp','Storage Opt']
 
 def connect_to_mongodb(collection_name):
 	client = pymongo.MongoClient()
@@ -144,7 +145,8 @@ def query_to_ordered_list(_query,name):
 
 def query_location_purpose(location,purpose):
 	result=[]
-	if purpose == 'general':
+	print(purpose)
+	if purpose == 'General':
 		aws_location = find_location(aws_regions,location)
 		aws_connect = connect_to_mongodb('aws')
 		aws_result = aws_connect.find({ "$and":[{'zone':aws_location},{'purpose':'general'}]}).sort('cpusPerVm',1)
@@ -157,10 +159,12 @@ def query_location_purpose(location,purpose):
 
 		google_location = find_location(google_regions,location)
 		google_connect = connect_to_mongodb('google')
-		google_result = azure_connect.find({ "$and":[{'zone':azure_location},{'purpose':'general'}]}).sort('cpusPerVm',1)
+		google_result = google_connect.find({ "$and":[{'zone':google_location},{'purpose':'general'}]}).sort('cpusPerVm',1)
 		result.extend(google_result)
+		for i in result:
+			print(i)
 		return result
-	elif purpose == 'computer_opt':
+	elif purpose == 'Computer Opt':
 		aws_location = find_location(aws_regions,location)
 		aws_connect = connect_to_mongodb('aws')
 		aws_result = aws_connect.find({ "$and":[{'zone':aws_location},{'purpose':'computer_opt'}]}).sort('cpusPerVm',1)
@@ -173,10 +177,10 @@ def query_location_purpose(location,purpose):
 
 		google_location = find_location(google_regions,location)
 		google_connect = connect_to_mongodb('google')
-		google_result = azure_connect.find({ "$and":[{'zone':azure_location},{'purpose':'computer_opt'}]}).sort('cpusPerVm',1)
+		google_result = google_connect.find({ "$and":[{'zone':google_location},{'purpose':'computer_opt'}]}).sort('cpusPerVm',1)
 		result.extend(google_result)
 		return result
-	elif purpose =='memory_opt':
+	elif purpose =='Memory Opt':
 		aws_location = find_location(aws_regions,location)
 		aws_connect = connect_to_mongodb('aws')
 		aws_result = aws_connect.find({ "$and":[{'zone':aws_location},{'purpose':'memory_opt'}]}).sort('cpusPerVm',1)
@@ -189,10 +193,10 @@ def query_location_purpose(location,purpose):
 
 		google_location = find_location(google_regions,location)
 		google_connect = connect_to_mongodb('google')
-		google_result = azure_connect.find({ "$and":[{'zone':azure_location},{'purpose':'memory_opt'}]}).sort('cpusPerVm',1)
+		google_result = google_connect.find({ "$and":[{'zone':google_location},{'purpose':'memory_opt'}]}).sort('cpusPerVm',1)
 		result.extend(google_result)
 		return result
-	elif purpose =='accelerated_comp':
+	elif purpose =='Accelerated Comp':
 		aws_location = find_location(aws_regions,location)
 		aws_connect = connect_to_mongodb('aws')
 		aws_result = aws_connect.find({ "$and":[{'zone':aws_location},{'purpose':'accelerated_comp'}]}).sort('cpusPerVm',1)
@@ -205,10 +209,10 @@ def query_location_purpose(location,purpose):
 
 		google_location = find_location(google_regions,location)
 		google_connect = connect_to_mongodb('google')
-		google_result = azure_connect.find({ "$and":[{'zone':azure_location},{'purpose':'accelerated_comp'}]}).sort('cpusPerVm',1)
+		google_result = google_connect.find({ "$and":[{'zone':google_location},{'purpose':'accelerated_comp'}]}).sort('cpusPerVm',1)
 		result.extend(google_result)
 		return result
-	elif purpose == 'storage_opt':
+	elif purpose == 'Storage Opt':
 		aws_location = find_location(aws_regions,location)
 		aws_connect = connect_to_mongodb('aws')
 		aws_result = aws_connect.find({ "$and":[{'zone':aws_location},{'purpose':'storage_opt'}]}).sort('cpusPerVm',1)
@@ -221,47 +225,60 @@ def query_location_purpose(location,purpose):
 
 		google_location = find_location(google_regions,location)
 		google_connect = connect_to_mongodb('google')
-		google_result = azure_connect.find({ "$and":[{'zone':azure_location},{'purpose':'storage_opt'}]}).sort('cpusPerVm',1)
+		google_result = google_connect.find({ "$and":[{'zone':google_location},{'purpose':'storage_opt'}]}).sort('cpusPerVm',1)
 		result.extend(google_result)
 		return result
 
+def find_purpose(purpose):
+	if purpose == 'General':
+		return 'general'
+	elif purpose == 'Computer Opt':
+		return 'computer_opt'
+	elif purpose == 'Memory Opt':
+		return 'memory_opt'
+	elif purpose == 'Accelerated Comp':
+		return 'accelerated_comp'
+	elif purpose == 'Storage Opt':
+		return 'storage_opt'
+
 def query_location_purpose_cpu(location,purpose,cpu):
 	result =[]
-	
+	n_purpose = find_purpose(purpose)
 	
 	aws_location = find_location(aws_regions,location)
 	aws_connect = connect_to_mongodb('aws')
-	aws_result = aws_connect.find({ "$and":[{'zone':aws_location},{'purpose': purpose },{'cpusPerVm': int(cpu)}]}).sort('memPerVm',1)
+	aws_result = aws_connect.find({ "$and":[{'zone':aws_location},{'purpose': n_purpose },{'cpusPerVm': int(cpu)}]}).sort('memPerVm',1)
 	result.extend(aws_result)
 	
 	azure_location = find_location(azure_regions,location)
 	azure_connect = connect_to_mongodb('azure')
-	azure_result = azure_connect.find({ "$and":[{'zone':azure_location},{'purpose': purpose},{'cpusPerVm': int(cpu)}]}).sort('memPerVm',1)
+	azure_result = azure_connect.find({ "$and":[{'zone':azure_location},{'purpose': n_purpose},{'cpusPerVm': int(cpu)}]}).sort('memPerVm',1)
 	result.extend(azure_result)
 
 	google_location = find_location(google_regions,location)
 	google_connect = connect_to_mongodb('google')
-	google_result = azure_connect.find({ "$and":[{'zone':azure_location},{'purpose':purpose},{'cpusPerVm': int(cpu)}]}).sort('memPerVm',1)
+	google_result = google_connect.find({ "$and":[{'zone':google_location},{'purpose': n_purpose},{'cpusPerVm': int(cpu)}]}).sort('memPerVm',1)
 	result.extend(google_result)
 	return result
 
 def query_location_purpose_cpu_mem(location,purpose,cpu,mem):
 	result =[]
 	
+	n_purpose = find_purpose(purpose)
 	
 	aws_location = find_location(aws_regions,location)
 	aws_connect = connect_to_mongodb('aws')
-	aws_result = aws_connect.find({ "$and":[{'zone':aws_location},{'purpose': purpose },{'cpusPerVm': int(cpu)},{'memPerVm': float(mem)}]})
+	aws_result = aws_connect.find({ "$and":[{'zone':aws_location},{'purpose': n_purpose },{'cpusPerVm': int(cpu)},{'memPerVm': float(mem)}]})
 	result.extend(aws_result)
 	
 	azure_location = find_location(azure_regions,location)
 	azure_connect = connect_to_mongodb('azure')
-	azure_result = azure_connect.find({ "$and":[{'zone':azure_location},{'purpose': purpose},{'cpusPerVm': int(cpu)},{'memPerVm': float(mem)}]})
+	azure_result = azure_connect.find({ "$and":[{'zone':azure_location},{'purpose': n_purpose},{'cpusPerVm': int(cpu)},{'memPerVm': float(mem)}]})
 	result.extend(azure_result)
 
 	google_location = find_location(google_regions,location)
 	google_connect = connect_to_mongodb('google')
-	google_result = azure_connect.find({ "$and":[{'zone':azure_location},{'purpose':purpose},{'cpusPerVm': int(cpu)},{'memPerVm': float(mem)}]})
+	google_result = google_connect.find({ "$and":[{'zone':google_location},{'purpose': n_purpose},{'cpusPerVm': int(cpu)},{'memPerVm': float(mem)}]})
 	result.extend(google_result)
 	return result
 
@@ -269,7 +286,11 @@ def query_location_purpose_cpu_mem(location,purpose,cpu,mem):
 @app.route("/index",methods = ['GET', 'POST'])
 @app.route("/home", methods = ['GET', 'POST'])
 def homepage():
-	return render_template('home.html', locations=locations, purposes = purposes)
+	return render_template('index.html', locations=locations, purposes = purposes)
+
+# @app.route('/test')
+# def test():
+# 	return render_template('index.html')
 
 @app.route("/<location>", methods = ['GET','POST'])
 def home_loc(location):
@@ -292,19 +313,19 @@ def home_loc(location):
 	mem_list = query_to_ordered_list(results,'memPerVm')	
 	gpu_list = query_to_ordered_list(results,'gpusPerVm')
 	
-	return render_template('home.html', locations=locations, results = results, purposes=purposes,
+	return render_template('second.html', locations=locations, results = results, purposes=purposes,
 	cpu_list=cpu_list, mem_list = mem_list, gpu_list=gpu_list, 	message=location)
 
 @app.route("/<location>/<purpose>")
 def location_purpose(location,purpose):
 	results = []
 	results.extend(query_to_list(query_location_purpose(location,purpose)))
-
+	#print(results)
 	cpu_list = query_to_ordered_list(results,'cpusPerVm')
 	mem_list = query_to_ordered_list(results,'memPerVm')	
 	gpu_list = query_to_ordered_list(results,'gpusPerVm')
 
-	return render_template('home.html', locations=locations, results = results, purposes=purposes,
+	return render_template('second.html', locations=locations, results = results, purposes=purposes,
 	cpu_list=cpu_list, mem_list = mem_list, gpu_list=gpu_list, 	message=location, 
 	message_purpose= purpose)
 
@@ -316,7 +337,7 @@ def location_purpose_cpu(location,purpose,cpu):
 	cpu_list = query_to_ordered_list(results,'cpusPerVm')
 	mem_list = query_to_ordered_list(results,'memPerVm')	
 
-	return render_template('home.html', locations=locations, results = results, purposes=purposes,
+	return render_template('second.html', locations=locations, results = results, purposes=purposes,
 	cpu_list=cpu_list, mem_list = mem_list, message=location, 
 	message_purpose= purpose, message_cpu=cpu)
 
@@ -329,35 +350,32 @@ def location_purpose_cpu_mem(location,purpose,cpu,mem):
 	mem_list = query_to_ordered_list(results,'memPerVm')	
 	#gpu_list = query_to_ordered_list(results,'gpusPerVm')
 
-	return render_template('home.html', locations=locations, results = results, purposes=purposes,
+	return render_template('second.html', locations=locations, results = results, purposes=purposes,
 	cpu_list=cpu_list, mem_list = mem_list, message=location, 
 	message_purpose= purpose, message_cpu=cpu,message_mem = mem)
 
-# @app.route("/providers",methods =['GET','POST'])
-# def get_button_data():
-	
-# 	if request.method == 'POST':
-		
-# 		if request.form['submit_button'] == 'AWS':
-# 			#print(global_location)
-# 			print('aws')
-# 			print(results)
-# 		elif request.form['submit_button'] == 'AZURE':
-# 			print('azure')
-# 		elif request.form['submit_button'] == 'GOOGLE':
-# 			print('google')
-# 		else:
-# 			pass
 
-# 		return "DONE"
-# 	else:
-# 		return "Something Wrong"
+@app.route("/pdf/<location>/<purpose>/<cpu>/<mem>")
+def pdf_template(location,purpose,cpu,mem):
+	print(location)
+	print(purpose)
+	print(cpu)
+	print(mem)
+	results =[]
+	results = query_to_list(query_location_purpose_cpu_mem(location,purpose,cpu,mem))
+	rendered =render_template('download_pdf.html', location=location,purpose=purpose,cpu=cpu,mem=mem,results=results)
+	pdf = pdfkit.from_string(rendered,False)
 
+	response = make_response(pdf)
+	response.headers['Content-Type'] = 'application/pdf'
+	response.headers['Content-Disposition'] = 'attachment; filename=output.pdf'
 
-@app.route('/result')
-def result():
+	return response
 
-	return render_template('result.html')
+# @app.route('/result')
+# def result():
+
+# 	return render_template('result.html')
 
 
 
@@ -369,3 +387,8 @@ def result():
 
 if __name__ == '__main__':
 	app.run(debug=True)
+
+
+
+
+	

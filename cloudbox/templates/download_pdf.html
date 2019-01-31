@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+
+	<h3>Loaction : {{location}}</h3>
+	<h3>Purpose : {{purpose}}</h3>
+	<h3>CPU : {{cpu}}</h3>
+	<h3>Memery : {{mem}}</h3>
+
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">TypeVm</th>
+      <th scope="col">Purpose</th>
+      <th scope="col">CPU</th>
+      <th scope="col">MEM</th>
+      <th scope="col">OnDemandPrice</th>
+      <th scope="col">Provider</th>
+    </tr>
+  </thead>
+  <tbody>
+  	{% if results %}
+
+	{% for result in results %}
+    <tr>
+    		
+		
+			<th scope="row"></th>
+			<td>{{result['type']}}</td>
+      		<td>{{result['purpose']}}</td>
+      		<td>{{result['cpusPerVm']}}</td>
+      		<td>{{result['memPerVm']}}</td>
+      		<td>{{result['onDemandPrice']}}</td>
+      		<td>{{result['provider']}}</td>
+
+		
+		
+      
+    </tr>
+    	{% endfor %}
+		{% endif %}
+
+
+		
+		
+  </tbody>
+</table>
+
+
+
+
+
+</body>
+
+
+
+</html>
