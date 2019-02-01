@@ -200,8 +200,22 @@
       <div class="container text-center">
         <h2 class="mb-4">Free Download at Start Bootstrap!</h2>
           <div class="container">
-            <button class="btn btn-light btn-xl sr-button" type="button" onclick="window.location.href='{{ url_for( 'pdf_template' , location=message,purpose=message_purpose,cpu=message_cpu,mem=message_mem) }}';">Download PDF</button>
+
+          {%if message_mem%}
+             <button class="btn btn-light btn-xl sr-button" type="button" onclick="window.location.href='{{ url_for( 'pdf_template' , location=message,purpose=message_purpose,cpu=message_cpu,mem=message_mem) }}';">Download PDF</button>
+          {% elif message_cpu %}
+            <button class="btn btn-light btn-xl sr-button" type="button" onclick="window.location.href='{{ url_for( 'pdf_template' , location=message,purpose=message_purpose,cpu=message_cpu) }}';">Download PDF</button>
+                  
+            {%else%}
+            <button class="btn btn-light btn-xl sr-button" type="button" onclick="window.location.href='{{ url_for( 'pdf_template' , location=message,purpose=message_purpose) }}';">Download PDF</button>
+
+
+            {%endif%}
+           
+          
+          
             </div>
+          
       </div>
     </section>
 

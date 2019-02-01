@@ -145,7 +145,7 @@ def query_to_ordered_list(_query,name):
 
 def query_location_purpose(location,purpose):
 	result=[]
-	print(purpose)
+	
 	if purpose == 'General':
 		aws_location = find_location(aws_regions,location)
 		aws_connect = connect_to_mongodb('aws')
@@ -161,8 +161,6 @@ def query_location_purpose(location,purpose):
 		google_connect = connect_to_mongodb('google')
 		google_result = google_connect.find({ "$and":[{'zone':google_location},{'purpose':'general'}]}).sort('cpusPerVm',1)
 		result.extend(google_result)
-		for i in result:
-			print(i)
 		return result
 	elif purpose == 'Computer Opt':
 		aws_location = find_location(aws_regions,location)
@@ -355,16 +353,28 @@ def location_purpose_cpu_mem(location,purpose,cpu,mem):
 	message_purpose= purpose, message_cpu=cpu,message_mem = mem)
 
 
+
 @app.route("/pdf/<location>/<purpose>/<cpu>/<mem>")
+@app.route("/pdf/<location>/<purpose>/<cpu>", defaults={'mem': None})
+@app.route("/pdf/<location>/<purpose>/", defaults={'cpu': None, 'mem': None})
 def pdf_template(location,purpose,cpu,mem):
-	print(location)
-	print(purpose)
-	print(cpu)
-	print(mem)
+		
 	results =[]
-	results = query_to_list(query_location_purpose_cpu_mem(location,purpose,cpu,mem))
-	rendered =render_template('download_pdf.html', location=location,purpose=purpose,cpu=cpu,mem=mem,results=results)
-	pdf = pdfkit.from_string(rendered,False)
+	if cpu is None and mem is None:
+		results = query_to_list(query_location_purpose(location,purpose))
+		cpu_list = query_to_ordered_list(results,'cpusPerVm')
+		mem_list = query_to_ordered_list(results,'memPerVm')
+		rendered =render_template('download_pdf.html', location=location,purpose=purpose,cpu=cpu_list,mem=mem_list,results=results)
+		pdf = pdfkit.from_string(rendered,False)
+	elif mem == None:
+		results = query_to_list(query_location_purpose_cpu(location,purpose,cpu))
+		mem_list = query_to_ordered_list(results,'memPerVm')
+		rendered =render_template('download_pdf.html', location=location,purpose=purpose,cpu=cpu,mem=mem_list,results=results)
+		pdf = pdfkit.from_string(rendered,False)
+	else:
+		results = query_to_list(query_location_purpose_cpu_mem(location,purpose,cpu,mem))
+		rendered =render_template('download_pdf.html', location=location,purpose=purpose,cpu=cpu,mem=mem,results=results)
+		pdf = pdfkit.from_string(rendered,False)
 
 	response = make_response(pdf)
 	response.headers['Content-Type'] = 'application/pdf'
