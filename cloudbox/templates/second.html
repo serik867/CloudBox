@@ -31,11 +31,12 @@
   </head>
 
   <body id="page-top">
+    
 
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
       <div class="container">
-        <a class="navbar-brand js-scroll-trigger" href="#page-top">Start Bootstrap</a>
+        <a class="navbar-brand js-scroll-trigger" href="{{url_for('homepage')}}">Cloud Box</a>
         <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -54,15 +55,15 @@
         <div class="row">
 
           <div class="col-lg-8 mx-auto text-center">
-            <h2 class="section-heading text-white">We've got what you need!</h2>
+            <h2 class="section-heading text-white">Select city closest to you!</h2>
             <hr class="light my-4">
-            <p class="text-faded mb-4">Start Bootstrap has everything you need to get your new website up and running in no time! All of the templates and themes on Start Bootstrap are open source, free to download, and easy to use. No strings attached!</p>
+  
                     <div class="btn-group dropright">
                     <button type="button" class="btn btn-light btn-xl dropdown-toggle js-scroll-trigger" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                       {%if message%}
                         {{message}}
                       {%else%}
-                      Select Location
+                     Location
                        {%endif%}
                     </button>
                     <div class="dropdown-menu" >
@@ -72,17 +73,18 @@
                     </div>
             <!-- <a class="btn btn-light btn-xl js-scroll-trigger" href="#services">Get Started!</a> -->
           </div>
+          
+          <div style="height: 30px"></div>
 
           <div class="col-lg-8 mx-auto text-center">
-            <h2 class="section-heading text-white">We've got what you need!</h2>
+            <h2 class="section-heading text-white">Use Case!</h2>
             <hr class="light my-4">
-            <p class="text-faded mb-4">Start Bootstrap has everything you need to get your new website up and running in no time! All of the templates and themes on Start Bootstrap are open source, free to download, and easy to use. No strings attached!</p>
               <div class="btn-group dropright">
                 <button type="button" class="btn btn-light btn-xl js-scroll-trigger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                       {%if message_purpose%}
                         {{message_purpose}}
                       {%else%}
-                      Select Purpose
+                     Purpose
                        {%endif%}
                       </button>
                   <div class="dropdown-menu" >
@@ -94,49 +96,72 @@
 
               </div>
           </div>
+            
+          <div style="height: 30px"></div>
 
           <div class="col-lg-8 mx-auto text-center">
-            <h2 class="section-heading text-white">We've got what you need!</h2>
+            <h2 class="section-heading text-white">Virtual CPU!</h2>
             <hr class="light my-4">
-            <p class="text-faded mb-4">Start Bootstrap has everything you need to get your new website up and running in no time! All of the templates and themes on Start Bootstrap are open source, free to download, and easy to use. No strings attached!</p>
             <div class="btn-group dropdown">
         <button type="button" class="btn btn-light btn-xl js-scroll-trigger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id = "cpu">
+
              {%if message_cpu%}
                         {{message_cpu}}
                       {%else%}
-                      Select CPU
+                      vCPU
                        {%endif%}
             </button>
               <div class="dropdown-menu" >
-              {% for cpu in cpu_list %}
-
+              {%if  message_purpose%}
+            
+              {% for cpu in cpu_list %}  
           <a class="dropdown-item" name = "{{cpu}}" value="{{ cpu }}" href="{{url_for('location_purpose_cpu',location = message, purpose = message_purpose, cpu = cpu )}}">
           {{cpu}}</a>
-                
-              
               {% endfor %}
+                
+                {%else%}
+
+                {% for cpu in cpu_list %}
+              <a class="dropdown-item" name = "{{cpu}}" value="{{ cpu }}" href="{{url_for('location_cpu_mem',location = message, cpu = cpu )}}">
+          {{cpu}}</a>
+              {% endfor %}
+                 {%endif%}
             </div>
 
         </div>
+       
 
+          <div style="height: 30px"></div>
           </div>
           <div class="col-lg-8 mx-auto text-center">
-            <h2 class="section-heading text-white">We've got what you need!</h2>
+            <h2 class="section-heading text-white">Memory</h2>
             <hr class="light my-4">
-            <p class="text-faded mb-4">Start Bootstrap has everything you need to get your new website up and running in no time! All of the templates and themes on Start Bootstrap are open source, free to download, and easy to use. No strings attached!</p>
+            
             <div class="btn-group dropdown">
+            
         <button type="button" class="btn btn-light btn-xl js-scroll-trigger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id = "cpu">
               {%if message_mem%}
-                        {{message_mem}}
-                      {%else%}
-                      Select Memory
-                       {%endif%}
+                  {{message_mem}}
+                {%else%}
+                  Memory
+                {%endif%}
             </button>
               <div class="dropdown-menu" >
+    
               {% for mem in mem_list %}
-              <a class="dropdown-item" name = "{{mem}}" value="{{ mem }}" href="{{url_for('location_purpose_cpu_mem',location = message,purpose = message_purpose,cpu= message_cpu, mem = mem )}}">{{ mem }}</a>
-              
+                
+                {%if message_purpose%}
+            <a class="dropdown-item" name = "{{mem}}" value="{{ mem }}" href="{{url_for('location_purpose_cpu_mem',location = message,purpose = message_purpose,cpu= message_cpu, mem = mem )}}">{{ mem }}</a>
+               {%else%}
+               <a class="dropdown-item" name = "{{mem}}" value="{{ mem }}" href="{{url_for('location_cpu_mem',location = message,cpu= message_cpu, mem = mem)}}">{{ mem }}</a>
+
+
+               {%endif%}
+
               {% endfor %}
+
+              
+             
             </div>
 
         </div>
@@ -196,22 +221,32 @@
       </div>
     </section>
 
+
+     {%if message is not defined %}
+     {% set message = None%}
+      {%endif%}
+
+      {%if message_purpose is not defined %}
+     {% set message_purpose = None%}
+     {%endif%}
+
+     {%if message_cpu is not defined %}
+     {% set message_cpu = None%}
+     {%endif%}
+
+    {%if message_mem is not defined %}
+    {% set message_mem = None%}
+    {%endif%}
+     
+      
     <section class="bg-dark text-white">
       <div class="container text-center">
-        <h2 class="mb-4">Free Download at Start Bootstrap!</h2>
+        <h2 class="mb-4">Download a PDF!</h2>
           <div class="container">
-
-          {%if message_mem%}
-             <button class="btn btn-light btn-xl sr-button" type="button" onclick="window.location.href='{{ url_for( 'pdf_template' , location=message,purpose=message_purpose,cpu=message_cpu,mem=message_mem) }}';">Download PDF</button>
-          {% elif message_cpu %}
-            <button class="btn btn-light btn-xl sr-button" type="button" onclick="window.location.href='{{ url_for( 'pdf_template' , location=message,purpose=message_purpose,cpu=message_cpu) }}';">Download PDF</button>
-                  
-            {%else%}
-            <button class="btn btn-light btn-xl sr-button" type="button" onclick="window.location.href='{{ url_for( 'pdf_template' , location=message,purpose=message_purpose) }}';">Download PDF</button>
-
-
-            {%endif%}
            
+          
+          <button class="btn btn-light btn-xl sr-button" type="button" onclick="window.location.href='{{ url_for( 'pdf_template' ,location=message,purpose=message_purpose,cpu=message_cpu,mem=message_mem) }}';">Download PDF</button>
+          
           
           
             </div>
@@ -219,29 +254,7 @@
       </div>
     </section>
 
-    <section id="contact">
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-8 mx-auto text-center">
-            <h2 class="section-heading">Let's Get In Touch!</h2>
-            <hr class="my-4">
-            <p class="mb-5">Ready to start your next project with us? That's great! Give us a call or send us an email and we will get back to you as soon as possible!</p>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-lg-4 ml-auto text-center">
-            <i class="fas fa-phone fa-3x mb-3 sr-contact-1"></i>
-            <p>123-456-6789</p>
-          </div>
-          <div class="col-lg-4 mr-auto text-center">
-            <i class="fas fa-envelope fa-3x mb-3 sr-contact-2"></i>
-            <p>
-              <a href="mailto:your-email@your-domain.com">feedback@startbootstrap.com</a>
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
+    
 
     <!-- Bootstrap core JavaScript -->
     <script src="/static/vendor/jquery/jquery.min.js"></script>

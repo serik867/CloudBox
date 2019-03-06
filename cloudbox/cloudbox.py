@@ -227,6 +227,46 @@ def query_location_purpose(location,purpose):
 		result.extend(google_result)
 		return result
 
+def qeury_location_cpu(location,cpu):
+	result =[]
+	
+	aws_location = find_location(aws_regions,location)
+	aws_connect = connect_to_mongodb('aws')
+	aws_result = aws_connect.find({ "$and":[{'zone':aws_location},{'cpusPerVm': int(cpu)}]}).sort('memPerVm',1)
+	result.extend(aws_result)
+	
+	azure_location = find_location(azure_regions,location)
+	azure_connect = connect_to_mongodb('azure')
+	azure_result = azure_connect.find({ "$and":[{'zone':azure_location},{'cpusPerVm': int(cpu)}]}).sort('memPerVm',1)
+	result.extend(azure_result)
+
+	google_location = find_location(google_regions,location)
+	google_connect = connect_to_mongodb('google')
+	google_result = google_connect.find({ "$and":[{'zone':google_location},{'cpusPerVm': int(cpu)}]}).sort('memPerVm',1)
+	result.extend(google_result)
+	return result
+
+def query_location_cpu_mem(location,cpu,mem):
+	result =[]
+	
+	aws_location = find_location(aws_regions,location)
+	aws_connect = connect_to_mongodb('aws')
+	aws_result = aws_connect.find({ "$and":[{'zone':aws_location},{'cpusPerVm': int(cpu)},{'memPerVm': float(mem)}]})
+	result.extend(aws_result)
+	
+	azure_location = find_location(azure_regions,location)
+	azure_connect = connect_to_mongodb('azure')
+	azure_result = azure_connect.find({ "$and":[{'zone':azure_location},{'cpusPerVm': int(cpu)},{'memPerVm': float(mem)}]})
+	result.extend(azure_result)
+
+	google_location = find_location(google_regions,location)
+	google_connect = connect_to_mongodb('google')
+	google_result = google_connect.find({ "$and":[{'zone':google_location},{'cpusPerVm': int(cpu)},{'memPerVm': float(mem)}]})
+	result.extend(google_result)
+	return result
+
+	
+
 def find_purpose(purpose):
 	if purpose == 'General':
 		return 'general'
@@ -306,13 +346,12 @@ def home_loc(location):
 		if region_google:
 			results.extend(query_to_list(google_search_by_location(region_google)))
 
-	
 	cpu_list = query_to_ordered_list(results,'cpusPerVm')
 	mem_list = query_to_ordered_list(results,'memPerVm')	
 	gpu_list = query_to_ordered_list(results,'gpusPerVm')
 	
 	return render_template('second.html', locations=locations, results = results, purposes=purposes,
-	cpu_list=cpu_list, mem_list = mem_list, gpu_list=gpu_list, 	message=location)
+	cpu_list=cpu_list, mem_list = mem_list, gpu_list=gpu_list, 	message=location,)
 
 @app.route("/<location>/<purpose>")
 def location_purpose(location,purpose):
@@ -327,6 +366,11 @@ def location_purpose(location,purpose):
 	cpu_list=cpu_list, mem_list = mem_list, gpu_list=gpu_list, 	message=location, 
 	message_purpose= purpose)
 
+
+# @app.route("/<location>/<int:cpu>/<int:mem>")
+# def location_cpu(location,cpu,mem):
+# 	return "Done"
+
 @app.route("/<location>/<purpose>/<cpu>")
 def location_purpose_cpu(location,purpose,cpu):
 	results =[]
@@ -336,9 +380,31 @@ def location_purpose_cpu(location,purpose,cpu):
 	mem_list = query_to_ordered_list(results,'memPerVm')	
 
 	return render_template('second.html', locations=locations, results = results, purposes=purposes,
-	cpu_list=cpu_list, mem_list = mem_list, message=location, 
-	message_purpose= purpose, message_cpu=cpu)
+	cpu_list=cpu_list, mem_list = mem_list, message=location,message_purpose =purpose, message_cpu=cpu)
 
+@app.route("/<location>/<cpu>/<float:mem>")
+@app.route("/<location>/<int:cpu>", defaults={'mem': None})
+@app.route("/<location>", defaults={'cpu': None,'mem': None})
+def location_cpu_mem(location,cpu,mem):
+
+	purpose = None
+	results =[]
+
+	if mem != None:
+		results = query_to_list(query_location_cpu_mem(location,cpu,mem))
+		cpu_list = query_to_ordered_list(results,'cpusPerVm')
+		mem_list = query_to_ordered_list(results,'memPerVm')	
+
+		return render_template('second.html', locations=locations, results = results, purposes=purposes,
+		cpu_list=cpu_list, mem_list = mem_list, message=location, 
+		message_purpose= purpose, message_cpu=cpu, message_mem = mem)
+	else:
+		results = query_to_list(qeury_location_cpu(location,cpu))
+		cpu_list = query_to_ordered_list(results,'cpusPerVm')
+		mem_list = query_to_ordered_list(results,'memPerVm')
+		return render_template('second.html', locations=locations, results = results, purposes=purposes,
+		cpu_list=cpu_list, mem_list = mem_list, message=location, 
+		message_purpose= purpose, message_cpu=cpu, message_mem = mem)
 
 @app.route("/<location>/<purpose>/<cpu>/<mem>")
 def location_purpose_cpu_mem(location,purpose,cpu,mem):
@@ -354,18 +420,34 @@ def location_purpose_cpu_mem(location,purpose,cpu,mem):
 
 
 
+
 @app.route("/pdf/<location>/<purpose>/<cpu>/<mem>")
-@app.route("/pdf/<location>/<purpose>/<cpu>", defaults={'mem': None})
-@app.route("/pdf/<location>/<purpose>/", defaults={'cpu': None, 'mem': None})
+@app.route("/pdf/<location>/<purpose>/<int:cpu>", defaults={'mem': None})
+@app.route("/pdf/<location>/<purpose>", defaults={'cpu': None, 'mem': None})
+@app.route("/pdf/<location>/<int:cpu>/<mem>", defaults={'purpose':None})
+@app.route("/pdf/<location>/<int:cpu>", defaults={'purpose':None,'mem': None})
+@app.route("/pdf/<location>", defaults={'purpose':None,'cpu':None,'mem': None})
 def pdf_template(location,purpose,cpu,mem):
-		
+
+
 	results =[]
-	if cpu is None and mem is None:
+	if purpose == None and mem == None:
+		results = query_to_list(qeury_location_cpu(location,cpu))
+		cpu_list = query_to_ordered_list(results,'cpusPerVm')
+		rendered =render_template('download_pdf.html', location=location,purpose=purpose,cpu=cpu_list,mem=mem,results=results)
+		pdf = pdfkit.from_string(rendered,False)
+	elif purpose == None:
+		results = query_to_list(query_location_cpu_mem(location,cpu,mem))
+		cpu_list = query_to_ordered_list(results,'cpusPerVm')
+		rendered =render_template('download_pdf.html', location=location,purpose=purpose,cpu=cpu_list,mem=mem,results=results)
+		pdf = pdfkit.from_string(rendered,False)
+	elif cpu == None and mem == None:
 		results = query_to_list(query_location_purpose(location,purpose))
 		cpu_list = query_to_ordered_list(results,'cpusPerVm')
 		mem_list = query_to_ordered_list(results,'memPerVm')
 		rendered =render_template('download_pdf.html', location=location,purpose=purpose,cpu=cpu_list,mem=mem_list,results=results)
 		pdf = pdfkit.from_string(rendered,False)
+
 	elif mem == None:
 		results = query_to_list(query_location_purpose_cpu(location,purpose,cpu))
 		mem_list = query_to_ordered_list(results,'memPerVm')
